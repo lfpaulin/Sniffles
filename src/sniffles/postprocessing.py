@@ -195,8 +195,9 @@ def qc_sv(svcall: SVCall, config: SnifflesConfig):
                 return False
 
     if abs(svcall.svlen) < config.minsvlen:
-        svcall.filter = "SVLEN_MIN"
-        return False
+        if svcall.support < 10:
+            svcall.filter = "SVLEN_MIN"
+            return False
 
     if svcall.svtype == "BND":
         if config.qc_bnd_filter_strand and len(set(lead.strand for lead in svcall.postprocess.cluster.leads)) < 2:
@@ -347,7 +348,9 @@ def qc_sv_post_annotate(svcall: SVCall, config: SnifflesConfig, coverage_average
         return False
 
     if config.mosaic and sv_is_mosaic:
-        if svcall.support < config.mosaic_min_reads:
+        min_mosaic_support = config.mosaic_min_reads if svcall.svtype in ["BND", "INV"] else config.mosaic_min_reads-1
+        # if svcall.support < config.mosaic_min_reads:
+        if svcall.support < min_mosaic_support:
             svcall.filter = "SUPPORT_MIN"
             return False
 

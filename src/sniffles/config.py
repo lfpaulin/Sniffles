@@ -329,7 +329,6 @@ class SnifflesConfig(argparse.Namespace):
     mosaic_qc_coverage_max_change_frac: float
     mosaic_qc_strand: bool
     mosaic_include_germline: bool
-    mosaic_qc_nm: bool
     # TODO some better rules here
     mosaic_min_reads: int = 3
     mosaic_use_strand_thresholds: int = 10
