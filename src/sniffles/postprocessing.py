@@ -348,7 +348,10 @@ def qc_sv_post_annotate(svcall: SVCall, config: SnifflesConfig, coverage_average
         return False
 
     if config.mosaic and sv_is_mosaic:
-        min_mosaic_support = config.mosaic_min_reads if svcall.svtype in ["BND", "INV"] else config.mosaic_min_reads-1
+        sd_pos = svcall.info["STDEV_POS"] if "STDEV_POS" in svcall.info else 1
+        sd_len = svcall.info["STDEV_LEN"] if "STDEV_LEN" in svcall.info else 1
+        filter_low_supp = not svcall.precise or sd_len/abs(svcall.svlen) > 0.1 or sd_pos > 5
+        min_mosaic_support = config.mosaic_min_reads if (svcall.svtype in ["BND", "INV"] or filter_low_supp) else config.mosaic_min_reads-1
         # if svcall.support < config.mosaic_min_reads:
         if svcall.support < min_mosaic_support:
             svcall.filter = "SUPPORT_MIN"
