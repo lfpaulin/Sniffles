@@ -573,14 +573,14 @@ def genotype_sv(svcall: SVCall, config, phase: tuple | None = None):
 
     GENOTYPER_BY_TYPE.get(svcall.svtype, Genotyper)(svcall, config, phase).calculate()
 
-    # post HP assessment for GT, hom alt should skip hp_filter, but gt is after phase
+    # post haplotype assessment for genotype, hom-alt should skip hp_filter, but gt is after phase
     try:
         a, b, gq, dr, dv, phase = svcall.genotypes[0]
-        if a == b and a == 1 and (phase := svcall.get_info("PHASE")):
-            hp, ps, hp_supp, ps_supp, hp_filt, ps_filt = phase.split(",")
-            if "NULL" != hp and "NULL" != ps:
-                hp_filt, ps_filt = "PASS", "PASS"
-                phase = (hp, ps)
+        if a == b and a == 1 and (phase_info := svcall.get_info("PHASE")):
+            hp, ps, hp_supp, ps_supp, hp_filt, ps_filt = phase_info.split(",")
+            if "NULL" != hp:
+                hp_filt = "PASS"
+                phase = (config.phase_identifiers.index(hp), ps)
                 svcall.genotypes[0] = (a, b, gq, dr, dv, phase)
                 svcall.set_info("PHASE", f"{hp},{ps},{hp_supp},{ps_supp},{hp_filt},{ps_filt}")
     except KeyError:
