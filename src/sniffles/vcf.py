@@ -41,9 +41,7 @@ def unpack_phase(phase, svid="") -> tuple:
             hp_i, ps = None, "."
         else:
             log.debug(f"Single not 'None'-valued phase: {phase}|{svid}")
-            hp_i, ps = phase, phase
-    if hp_i is None or ps is None:
-        return None, "."
+            hp_i, ps = phase, "."
     ps = ps if ps is not None else "."
     return hp_i, ps
 
@@ -69,7 +67,7 @@ def format_genotype(gt, is_phased):
     else:
         a, b, qual, dr, dv, phase, svid = gt
         hp_i, ps = unpack_phase(phase, svid)
-        if hp_i is not None and (a, b) == [(0, 1), (1, 1)]  and is_phased:
+        if hp_i is not None and (a, b) in [(0, 1), (1, 1)] and is_phased:
             gt_sep = "|"
             if hp_i == 0:
                 a, b = b, a
@@ -194,6 +192,10 @@ class VCF:
         if self.config.combine_population:
             self.write_header_line('INFO=<ID=POPULATION_AF,Number=1,Type=Float,Description="Population Allele Frequency">')
             self.write_header_line('INFO=<ID=POPULATION_SIZE,Number=1,Type=Integer,Description="Size of genotyped population for this variant">')
+            if self.config.phase:
+                self.write_header_line('NOTE: Sniffles does not provide population phasing, it just displays the phasing '
+                                       'information in a per sample bases. Multi-sample phasing may be inconsistent with '
+                                       'population phasing')
 
         samples_header = "\t".join(sample_id for _, sample_id in self.config.sample_ids_vcf)
         self.write_raw(f"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{samples_header}")
